@@ -6,12 +6,14 @@
 namespace tsp {
 namespace utils {
 
+const double EPSILON = 1e-10;
+
 std::vector<std::vector<double> > readData(std::istream &input) {
-    size_t n;
+    int n;
     input >> n;
     std::vector<std::vector<double> > metric(n, std::vector<double>(n));
-    for (size_t row = 0; row < n; ++row) {
-        for (size_t col = 0; col < n; ++col) {
+    for (int row = 0; row < n; ++row) {
+        for (int col = 0; col < n; ++col) {
             input >> metric[row][col];
         }
     }

@@ -44,6 +44,13 @@ class HeldKarpLowerBound {
                 for (int j = i + 1; j < n; ++j) {
                     variableID[i][j] = variableID[j][i] = counter;
                     objectiveCoefficient[counter] = metric[i][j];
+                    char constraint = partialTour[i][j];
+                    if (constraint == 0) {
+                        upperBound[counter] = 0.0;
+                    }
+                    else if (constraint == 1) {
+                        lowerBound[counter] = 1.0;
+                    }
                     ++counter;
                 }
             }
@@ -133,6 +140,18 @@ class HeldKarpLowerBound {
             result = GRBgetdblattr(gurobiModel, "ObjVal", &hkValue);
             if (result != 0) {
                 throw std::runtime_error("Can't query objective function");
+            }
+            std::vector<double> vars(numVars);
+            result = GRBgetdblattrarray(gurobiModel, "X", 0, numVars, &vars[0]);
+            for (int i = 0; i < n; ++i) {
+                for (int j = 0; j < n; ++j) {
+                    if (i == j) {
+                        fractionalTour[i][j] = 0.0;
+                    }
+                    else {
+                        fractionalTour[i][j] = vars[variableID[i][j]];
+                    }
+                }
             }
             result = GRBfreemodel(gurobiModel);
             if (result != 0) {

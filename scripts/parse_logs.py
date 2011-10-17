@@ -8,7 +8,7 @@ print "\\hline"
 print "$n$ & 2-matching bound & Held-Karp bound & cutting planes & fractional variables \\\\"
 print "\\hline"
 for n in range(10, 210, 10):
-    file = "log" + str(n) + ".txt"
+    file = "../logs/log" + str(n) + ".txt"
     current_item = dict()
     entries = []
     for line in open(file):

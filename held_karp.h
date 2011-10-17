@@ -107,7 +107,7 @@ class HeldKarpLowerBound {
                     if (result != 0) {
                         throw std::runtime_error("Can't query objective function");
                     }
-                    std::cerr << "2-matching bound: " << bimatchingBound << std::endl;
+                    std::cerr << "BIMATCHING_BOUND " << bimatchingBound << std::endl;
                 }
                 std::vector<double> vars(numVars);
                 result = GRBgetdblattrarray(gurobiModel, "X", 0, numVars, &vars[0]);
@@ -135,7 +135,7 @@ class HeldKarpLowerBound {
                     throw std::runtime_error("Can't update Gurobi model");
                 }
             }
-            std::cerr << numCuttingPlanes << " cutting planes" << std::endl;
+            std::cerr << "CUTTING_PLANES " << numCuttingPlanes << std::endl;
             double hkValue;
             result = GRBgetdblattr(gurobiModel, "ObjVal", &hkValue);
             if (result != 0) {

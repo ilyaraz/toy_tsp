@@ -9,6 +9,7 @@
 
 int main() {
     try {
+        std::cerr << "----------" << std::endl;
         std::vector<std::vector<double> > metric = tsp::utils::readData(std::cin);
         int n = static_cast<int>(metric.size());
         std::vector<std::vector<char> > emptyTour(n, std::vector<char>(n, -1));
@@ -16,7 +17,7 @@ int main() {
         tsp::core::HeldKarpLowerBound heldKarp(metric, emptyTour);
         double lpBound = heldKarp.getBound(fractionalTour);
         std::cerr.precision(20);
-        std::cerr << "Held-Karp bound: " << lpBound << std::endl;
+        std::cerr << "HELD_KARP_BOUND " << lpBound << std::endl;
         int numFractionalVariables = 0;
         for (int i = 0; i < n; ++i) {
             for (int j = i + 1; j < n; ++j) {
@@ -26,7 +27,7 @@ int main() {
                 }
             }
         }
-        std::cerr << numFractionalVariables << " fractional variables" << std::endl;
+        std::cerr << "FRACTIONAL_VARIABLES " << numFractionalVariables << std::endl;
     }
     catch (std::runtime_error &e) {
         std::cerr << "runtime error: " << e.what() << std::endl;

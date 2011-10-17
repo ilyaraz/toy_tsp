@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for ((i = 10; i <= 200; i += 10))
+for ((i = 10; i <= 500; i += 10))
 do
     echo "n = $i"
     touch ../logs/log$i.txt

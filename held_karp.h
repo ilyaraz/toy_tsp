@@ -3,7 +3,7 @@
 #include "utils.h"
 
 extern "C" {
-#include "gurobi_c.h"
+#include <gurobi_c.h>
 }
 
 #include <lemon/list_graph.h>

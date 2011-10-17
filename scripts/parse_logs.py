@@ -7,7 +7,7 @@ print "\\begin{tabular}{|rrrrr|}"
 print "\\hline"
 print "$n$ & 2-matching bound & Held-Karp bound & cutting planes & fractional variables \\\\"
 print "\\hline"
-for n in range(10, 510, 10):
+for n in range(50, 550, 50):
     file = "../logs/log" + str(n) + ".txt"
     current_item = dict()
     entries = []

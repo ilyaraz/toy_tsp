@@ -5,18 +5,23 @@
     <title>Held-Karp demo</title>
 </head>
 <body>
-    <canvas id="drawingArea"></canvas>
+   <canvas id="drawingArea"></canvas>
     <form id="selector">
         <input type="text" id="n"/>
         <input type="button" id="generate" value="generate"/>
     </form>
-    <script src="jquery-1.6.4.min.js"></script>
+    <div id="queryIndicator" style="background:#ffcc00;display:none">
+        <p>Running solver...</p>
+    </div>
+     <script src="jquery-1.6.4.min.js"></script>
     <script>
         var CANVAS_SIZE = 700;
         var MIN_N = 10;
         var MAX_N = 300;
         var MARGIN = 30;
         var BALLS_RADIUS = 5;
+        
+        var querying = false;
 
         var filter = new RegExp("^[0-9]{1,3}$");
         $(document).ready(function(){
@@ -25,6 +30,10 @@
             drawingArea.height = CANVAS_SIZE;
         });
         $("#generate").click(function(){
+            if (querying) {
+                alert("already querying...");
+                return;
+            }
             var nstr = $("#n").val();
             var isBad = false;
             if (!/^[0-9]{1,9}$/.test(nstr)) {
@@ -40,6 +49,8 @@
                 alert("n must be in the range [" + MIN_N + ", " + MAX_N + "]");
                 return;
             }
+            querying = true;
+            $("#queryIndicator")[0].style.display = "block";
             $.get("engine?n=" + n, null, function(data) {
                 var canvas = $("#drawingArea")[0];
                 var context = canvas.getContext("2d");
@@ -61,6 +72,8 @@
                 for (var i = 0; i < points.length; ++i) {
                     drawPoint(points[i], context);
                 }
+                querying = false;
+                $("#queryIndicator")[0].style.display = "none";
             });
         });
 
@@ -96,8 +109,10 @@
             var x2 = rescale(points[vagueEdge[1]][0], CANVAS_SIZE, MARGIN);
             var y2 = rescale(points[vagueEdge[1]][1], CANVAS_SIZE, MARGIN);
 
-            var intensity = parseInt(vagueEdge[2] * 255);
-            context.strokeStyle = "rgb(0," + intensity + ",0)";
+            var red = parseInt((1 - vagueEdge[2]) * 255);
+            var green = red; 
+            var blue = 255;
+            context.strokeStyle = "rgb(" + red + "," + green + "," + blue + ")";
             console.log(context.strokeStyle);
             context.beginPath();
             context.moveTo(x1, y1);

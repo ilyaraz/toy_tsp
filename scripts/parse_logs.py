@@ -22,13 +22,17 @@ for n in range(50, 550, 50):
     if len(current_item):
         entries.append(current_item)
     sums = dict()
+    num_entries = 0
     for row in entries:
+        if len(row) != 4:
+            continue
+        num_entries += 1
         for key in row.keys():
             if not (key in sums):
                 sums[key] = 0.0
             sums[key] += float(row[key])
     for stat in sums:
-        sums[stat] /= len(entries)
+        sums[stat] /= num_entries
     print "%d & %.3f & %.3f & %.3f & %.3f \\\\" % (n, sums["BIMATCHING_BOUND"], sums["HELD_KARP_BOUND"], sums["CUTTING_PLANES"], sums["FRACTIONAL_VARIABLES"])
 print "\\hline"
 print "\\end{tabular}"

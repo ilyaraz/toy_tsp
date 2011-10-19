@@ -15,9 +15,6 @@
 #include <cstdio>
 #include <cstring>
 
-const int MIN_N = 10;
-const int MAX_N = 1000;
-
 std::string processRequest(int n) {
     std::vector<std::pair<double, double> > points = tsp::utils::generateEuclidean(n);
     std::vector<std::vector<double> > metric = tsp::utils::getEuclideanMetric(points);
@@ -125,7 +122,7 @@ void *callback(enum mg_event event,
             if (!(ss >> n)) {
                 return NULL;
             }
-            if (n < MIN_N && n > MAX_N) {
+            if (n < 1) {
                 return NULL;
             }
             std::cerr << "good n: " << n << std::endl;

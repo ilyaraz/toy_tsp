@@ -49,5 +49,45 @@ std::vector<std::vector<double> > getEuclideanMetric(const std::vector<std::pair
     return metric;
 }
 
+double evaluateTour(const std::vector<std::vector<double> > &metric, const std::vector<int> &tour) {
+    double length = 0.0;
+    int n = static_cast<int>(tour.size());
+    for (int i = 0; i < n; ++i) {
+        length += metric[tour[i]][tour[(i + 1) % n]];
+    }
+    return length;
+}
+
+class DSU {
+public:
+    DSU(int n): parent(n) {
+        for (int i = 0; i < n; ++i) {
+            parent[i] = i;
+        }
+    }
+
+    int getRoot(int x) {
+        if (x != parent[x]) {
+            parent[x] = getRoot(parent[x]);
+        }
+        return parent[x];
+    }
+
+    void connect(int x, int y) {
+        link(getRoot(x), getRoot(y));
+    }
+private:
+    std::vector<int> parent;
+
+    void link(int x, int y) {
+        if (rand() % 2) {
+            parent[x] = y;
+        }
+        else {
+            parent[y] = x;
+        }
+    }
+};
+
 }
 }

@@ -1,13 +1,19 @@
 import os
 import re
+import itertools
+
+data = [["Held-Karp bound", "HELD_KARP_BOUND"], ["Nearest Neighbor", "NEAREST_NEIGHBOR_TOUR"], ["Greedy", "GREEDY_TOUR"], ["Greedy + 2-opt", "GREEDY_2OPT_TOUR"], ["Greedy + best-2-opt", "GREEDY_BEST2OPT_TOUR"]]
 
 print "\\documentclass{article}"
 print "\\begin{document}"
-print "\\begin{tabular}{|rrrrr|}"
+print "\\begin{tabular}{|" + "".join(itertools.repeat('r', len(data) + 1)) + "|}"
 print "\\hline"
-print "$n$ & 2-matching bound & Held-Karp bound & cutting planes & fractional variables \\\\"
+print "$n$",
+for item in data:
+    print "&", item[0],
+print "\\\\"
 print "\\hline"
-for n in range(50, 550, 50):
+for n in range(10, 210, 10):
     file = "../logs/log" + str(n) + ".txt"
     current_item = dict()
     entries = []
@@ -24,8 +30,6 @@ for n in range(50, 550, 50):
     sums = dict()
     num_entries = 0
     for row in entries:
-        if len(row) != 4:
-            continue
         num_entries += 1
         for key in row.keys():
             if not (key in sums):
@@ -33,7 +37,10 @@ for n in range(50, 550, 50):
             sums[key] += float(row[key])
     for stat in sums:
         sums[stat] /= num_entries
-    print "%d & %.3f & %.3f & %.3f & %.3f \\\\" % (n, sums["BIMATCHING_BOUND"], sums["HELD_KARP_BOUND"], sums["CUTTING_PLANES"], sums["FRACTIONAL_VARIABLES"])
+    print "%d" % n,
+    for item in data:
+        print "& %.3f" % sums[item[1]],
+    print "\\\\"
 print "\\hline"
 print "\\end{tabular}"
 print "\\end{document}"

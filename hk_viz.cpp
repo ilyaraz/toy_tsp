@@ -1,4 +1,5 @@
 #include "held_karp.h"
+#include "heuristics.h"
 #include "utils.h"
 
 #include "mongoose.h"
@@ -8,23 +9,35 @@
 #include <sstream>
 #include <string>
 #include <utility>
+#include <stdexcept>
 #include <vector>
 
 #include <cstdio>
 #include <cstring>
 
 const int MIN_N = 10;
-const int MAX_N = 300;
+const int MAX_N = 1000;
 
 std::string processRequest(int n) {
     std::vector<std::pair<double, double> > points = tsp::utils::generateEuclidean(n);
     std::vector<std::vector<double> > metric = tsp::utils::getEuclideanMetric(points);
     std::vector<std::vector<char> > partialTour(n, std::vector<char>(n, -1));
     tsp::core::HeldKarpLowerBound solver(metric, partialTour);
-    std::vector<std::vector<double> > fractionalTour(n, std::vector<double>(n));
+    std::vector<std::vector<double> > fractionalTour(n, std::vector<double>(n, 0.0));
+    /*
     std::cerr << "computing Held-Karp... " << std::endl;
     solver.getBound(fractionalTour);
     std::cerr << "done" << std::endl;
+    */
+    tsp::core::TSPHeuristics heuristicSolver(metric);
+    std::vector<int> greedyTour = heuristicSolver.getGreedyTour();
+    heuristicSolver.doBest2Opt(greedyTour);
+    for (int i = 0; i < n; ++i) {
+        int u = greedyTour[i];
+        int v = greedyTour[(i + 1) % n];
+        fractionalTour[u][v] = 1.0;
+        fractionalTour[v][u] = 1.0;
+    }
     std::ostringstream oss;
     oss.setf(std::ios::fixed);
     oss.precision(5);
@@ -128,12 +141,17 @@ void *callback(enum mg_event event,
 }
 
 int main() {
-  struct mg_context *ctx;
-  const char *options[] = {"listening_ports", "8080", NULL};
+    try {
+        struct mg_context *ctx;
+        const char *options[] = {"listening_ports", "8080", NULL};
 
-  ctx = mg_start(&callback, NULL, options);
-  getchar();
-  mg_stop(ctx);
+        ctx = mg_start(&callback, NULL, options);
+        getchar();
+        mg_stop(ctx);
+    }
+    catch (std::runtime_error &e) {
+        std::cerr << "runtime error: " << e.what() << std::endl;
+    }
 
-  return 0;
+    return 0;
 }

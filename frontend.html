@@ -17,7 +17,7 @@
     <script>
         var CANVAS_SIZE = 700;
         var MIN_N = 10;
-        var MAX_N = 300;
+        var MAX_N = 1000;
         var MARGIN = 30;
         var BALLS_RADIUS = 5;
         
@@ -51,12 +51,11 @@
             }
             querying = true;
             $("#queryIndicator")[0].style.display = "block";
+            var canvas = $("#drawingArea")[0];
+            var context = canvas.getContext("2d");
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            context.beginPath();
             $.get("engine?n=" + n, null, function(data) {
-                var canvas = $("#drawingArea")[0];
-                var context = canvas.getContext("2d");
-                context.clearRect(0, 0, canvas.width, canvas.height);
-                context.beginPath();
-
                 response = eval("(" + data + ")");
                 var points = response.points;
                 var fixedEdges = response.fixedEdges;

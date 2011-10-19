@@ -4,6 +4,7 @@
 
 #include <algorithm>
 #include <stdexcept>
+#include <utility>
 #include <vector>
 
 namespace tsp {
@@ -136,7 +137,6 @@ public:
                     int c3 = tour[j];
                     int c4 = tour[(j + 1) % n];
                     double gain = metric[c1][c2] + metric[c3][c4] - metric[c1][c3] - metric[c2][c4];  
-                    //std::cerr << gain << " ";
                     if (gain > bestGain) {
                         bestGain = gain;
                         bestI = i;
@@ -144,8 +144,6 @@ public:
                     }
                 }
             }
-            //std::cerr << std::endl;
-            //std::cerr << bestGain << std::endl;
             if (bestGain < tsp::utils::EPSILON) {
                 break;
             }

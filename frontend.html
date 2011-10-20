@@ -5,17 +5,25 @@
     <title>Held-Karp demo</title>
 </head>
 <body>
-    <canvas id="drawingArea"></canvas>
+    <canvas id="lowerBoundArea"></canvas>
+    <div id="upperBoundAreaHolder">
+        <canvas id="upperBoundArea"></canvas>
+    </div>
     <form id="selector">
         <input type="text" id="n"/>
         <input type="button" id="generate" value="generate"/>
     </form>
+    <div>
+        <p id="lowerBoundValue">lower bound:</p>
+        <p id="upperBoundValue">upper bound:</p>
+        <p id="gapValue">gap:</p>
+    </div>
     <div id="queryIndicator" style="background:#ffcc00;display:none">
         <p>Running solver...</p>
     </div>
-     <script src="jquery-1.6.4.min.js"></script>
+    <script src="jquery-1.6.4.min.js"></script>
     <script>
-        var CANVAS_SIZE = 700;
+        var CANVAS_SIZE = 650;
         var MIN_N = 10;
         var MAX_N = 5000;
         var MARGIN = 30;
@@ -25,9 +33,18 @@
 
         var filter = new RegExp("^[0-9]{1,3}$");
         $(document).ready(function(){
-            var canvas = $("#drawingArea")[0];
-            drawingArea.width = CANVAS_SIZE;
-            drawingArea.height = CANVAS_SIZE;
+            var lowerBoundCanvas = $("#lowerBoundArea")[0];
+            lowerBoundCanvas.width = CANVAS_SIZE;
+            lowerBoundCanvas.height = CANVAS_SIZE;
+
+            var upperBoundHolder = $("#upperBoundAreaHolder")[0];
+            upperBoundHolder.style.position = "absolute";
+            upperBoundHolder.style.top = "0px";
+            upperBoundHolder.style.left = "" + CANVAS_SIZE + "px";
+
+            var upperBoundCanvas = $("#upperBoundArea")[0];
+            upperBoundCanvas.width = CANVAS_SIZE;
+            upperBoundCanvas.height = CANVAS_SIZE;
         });
         $("#generate").click(function(){
             if (querying) {
@@ -51,25 +68,42 @@
             }
             querying = true;
             $("#queryIndicator")[0].style.display = "block";
-            var canvas = $("#drawingArea")[0];
-            var context = canvas.getContext("2d");
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            context.beginPath();
+            var lowerBoundCanvas = $("#lowerBoundArea")[0];
+            var lowerBoundContext = lowerBoundCanvas.getContext("2d");
+            lowerBoundContext.clearRect(0, 0, lowerBoundCanvas.width, lowerBoundCanvas.height);
+            var upperBoundCanvas = $("#upperBoundArea")[0];
+            var upperBoundContext = upperBoundCanvas.getContext("2d");
+            upperBoundContext.clearRect(0, 0, upperBoundCanvas.width, upperBoundCanvas.height);
+            $("#lowerBoundValue")[0].innerHTML = "lower bound:";
+            $("#upperBoundValue")[0].innerHTML = "upper bound:";
+            $("#gapValue")[0].innerHTML = "gap:";
             $.get("engine?n=" + n, null, function(data) {
                 response = eval("(" + data + ")");
                 var points = response.points;
                 var fixedEdges = response.fixedEdges;
                 var vagueEdges = response.vagueEdges;
-                context.lineWidth = 5;
+                var tourEdges = response.tourEdges;
+                var lowerBound = response.lowerBound;
+                var upperBound = response.upperBound;
+                $("#lowerBoundValue")[0].innerHTML = "lower bound: " + lowerBound;
+                $("#upperBoundValue")[0].innerHTML = "upper bound: " + upperBound;
+                $("#gapValue")[0].innerHTML = "gap: " + ((upperBound - lowerBound) / lowerBound);
+                lowerBoundContext.lineWidth = 5;
+                upperBoundContext.lineWidth = 5;
                 for (var i = 0; i < vagueEdges.length; ++i) {
-                    drawVagueEdge(points, vagueEdges[i], context);
+                    drawVagueEdge(points, vagueEdges[i], lowerBoundContext);
                 }
-                context.strokeStyle = "#ff0000";
+                lowerBoundContext.strokeStyle = "#ff0000";
+                upperBoundContext.strokeStyle = "#ff0000";
                 for (var i = 0; i < fixedEdges.length; ++i) {
-                    drawFixedEdge(points, fixedEdges[i], context);
+                    drawFixedEdge(points, fixedEdges[i], lowerBoundContext);
+                }
+                for (var i = 0; i < tourEdges.length; ++i) {
+                    drawFixedEdge(points, tourEdges[i], upperBoundContext);
                 }
                 for (var i = 0; i < points.length; ++i) {
-                    drawPoint(points[i], context);
+                    drawPoint(points[i], lowerBoundContext);
+                    drawPoint(points[i], upperBoundContext);
                 }
                 querying = false;
                 $("#queryIndicator")[0].style.display = "none";
@@ -112,7 +146,6 @@
             var green = red; 
             var blue = 255;
             context.strokeStyle = "rgb(" + red + "," + green + "," + blue + ")";
-            console.log(context.strokeStyle);
             context.beginPath();
             context.moveTo(x1, y1);
             context.lineTo(x2, y2);

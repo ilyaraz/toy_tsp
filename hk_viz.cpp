@@ -21,24 +21,19 @@ std::string processRequest(int n) {
     std::vector<std::vector<char> > partialTour(n, std::vector<char>(n, -1));
     tsp::core::HeldKarpLowerBound solver(metric, partialTour);
     std::vector<std::vector<double> > fractionalTour(n, std::vector<double>(n, 0.0));
-    /*
     std::cerr << "computing Held-Karp... " << std::endl;
-    solver.getBound(fractionalTour);
+    double lowerBound = solver.getBound(fractionalTour);
     std::cerr << "done" << std::endl;
-    */
     tsp::core::TSPHeuristics heuristicSolver(metric);
-    std::vector<int> greedyTour = heuristicSolver.getGreedyTour();
-    heuristicSolver.doBest3Opt(greedyTour);
-    for (int i = 0; i < n; ++i) {
-        int u = greedyTour[i];
-        int v = greedyTour[(i + 1) % n];
-        fractionalTour[u][v] = 1.0;
-        fractionalTour[v][u] = 1.0;
-    }
+    std::vector<int> heuristicTour = heuristicSolver.getGreedyTour();
+    heuristicSolver.doBest3Opt(heuristicTour);
+    double upperBound = tsp::utils::evaluateTour(metric, heuristicTour);
     std::ostringstream oss;
     oss.setf(std::ios::fixed);
     oss.precision(5);
     oss << "{";
+    oss << "\"lowerBound\": " << lowerBound << ",";
+    oss << "\"upperBound\": " << upperBound << ",";
     oss << "\"points\": [";
     for (int i = 0; i < n; ++i) {
         if (i != 0) {
@@ -78,6 +73,14 @@ std::string processRequest(int n) {
                 oss << "[" << i << "," << j << "," << value << "]";
             }
         }
+    }
+    oss << "],";
+    oss << "\"tourEdges\": [";
+    for (int i = 0; i < n; ++i) {
+        if (i != 0) {
+            oss << ",";
+        }
+        oss << "[" << heuristicTour[i] << "," << heuristicTour[(i + 1) % n] << "]";
     }
     oss << "]";
     oss << "}";

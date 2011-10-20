@@ -34,11 +34,18 @@ int main() {
         std::cerr << "NEAREST_NEIGHBOR_TOUR " << tsp::utils::evaluateTour(metric, nearestNeighborTour) << std::endl;
         std::vector<int> greedyTour = heuristicSolver.getGreedyTour();
         std::cerr << "GREEDY_TOUR " << tsp::utils::evaluateTour(metric, greedyTour) << std::endl;
-        std::vector<int> for2Opt(greedyTour);
-        heuristicSolver.do2Opt(for2Opt);
-        std::cerr << "GREEDY_2OPT_TOUR " << tsp::utils::evaluateTour(metric, for2Opt) << std::endl;
-        heuristicSolver.doBest2Opt(greedyTour);
-        std::cerr << "GREEDY_BEST2OPT_TOUR " << tsp::utils::evaluateTour(metric, greedyTour) << std::endl;
+        std::vector<int> freshCopy(greedyTour);
+        heuristicSolver.do2Opt(freshCopy);
+        std::cerr << "GREEDY_2OPT_TOUR " << tsp::utils::evaluateTour(metric, freshCopy) << std::endl;
+        freshCopy = greedyTour;
+        heuristicSolver.doBest2Opt(freshCopy);
+        std::cerr << "GREEDY_BEST2OPT_TOUR " << tsp::utils::evaluateTour(metric, freshCopy) << std::endl;
+        freshCopy = greedyTour;
+        heuristicSolver.do3Opt(freshCopy);
+        std::cerr << "GREEDY_3OPT_TOUR " << tsp::utils::evaluateTour(metric, freshCopy) << std::endl;
+        freshCopy = greedyTour;
+        heuristicSolver.doBest3Opt(freshCopy);
+        std::cerr << "GREEDY_BEST3OPT_TOUR " << tsp::utils::evaluateTour(metric, freshCopy) << std::endl;
     }
     catch (std::runtime_error &e) {
         std::cerr << "runtime error: " << e.what() << std::endl;

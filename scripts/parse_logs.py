@@ -2,7 +2,15 @@ import os
 import re
 import itertools
 
-data = [["Held-Karp bound", "HELD_KARP_BOUND"], ["Nearest Neighbor", "NEAREST_NEIGHBOR_TOUR"], ["Greedy", "GREEDY_TOUR"], ["Greedy + 2-opt", "GREEDY_2OPT_TOUR"], ["Greedy + best-2-opt", "GREEDY_BEST2OPT_TOUR"]]
+data = [
+    ["Held-Karp", "HELD_KARP_BOUND"],
+    ["NN", "NEAREST_NEIGHBOR_TOUR"],
+    ["Greedy", "GREEDY_TOUR"],
+    ["2-opt", "GREEDY_2OPT_TOUR"],
+    ["best-2-opt", "GREEDY_BEST2OPT_TOUR"],
+    ["3-opt", "GREEDY_3OPT_TOUR"],
+    ["best-3-opt", "GREEDY_BEST3OPT_TOUR"],
+]
 
 print "\\documentclass{article}"
 print "\\begin{document}"

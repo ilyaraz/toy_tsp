@@ -157,6 +157,257 @@ public:
         }
         std::cerr << "BEST2OPT_SWAPS " << numSwaps << std::endl;
     }
+
+    void do3Opt(std::vector<int> &tour) {
+        int n = static_cast<int>(tour.size());
+        int numRounds = 0;
+        int num2Swaps = 0;
+        int num3Swaps = 0;
+        std::vector<int> newTour(n);
+        for (;;) {
+            bool done = true;
+            for (int i = 0; i < n; ++i) {
+                for (int j = i + 1; j < n; ++j) {
+                    int c1 = tour[i];
+                    int c2 = tour[(i + 1) % n];
+                    int c3 = tour[j];
+                    int c4 = tour[(j + 1) % n];
+                    if (metric[c1][c2] + metric[c3][c4] > metric[c1][c3] + metric[c2][c4] + tsp::utils::EPSILON) {
+                        ++num2Swaps;
+                        done = false;
+                        int u = (i + 1) % n, v = j;
+                        while (u < v) {
+                            std::swap(tour[u], tour[v]);
+                            ++u;
+                            --v;
+                        }
+                    }
+                }
+            }
+            for (int i = 0; i < n; ++i) {
+                for (int j = i + 1; j < n; ++j) {
+                    for (int k = j + 1; k < n; ++k) {
+                        int c1 = tour[i];
+                        int c2 = tour[(i + 1) % n];
+                        int c3 = tour[j];
+                        int c4 = tour[(j + 1) % n];
+                        int c5 = tour[k];
+                        int c6 = tour[(k + 1) % n];
+                        if (metric[c1][c2] + metric[c3][c4] + metric[c5][c6] >
+                            metric[c1][c3] + metric[c2][c5] + metric[c4][c6] + tsp::utils::EPSILON) {
+                            int counter = i + 1;
+                            for (int l = j; l >= i + 1; --l) {
+                                newTour[counter++] = tour[l];
+                            }
+                            for (int l = k; l >= j + 1; --l) {
+                                newTour[counter++] = tour[l];
+                            }
+                            for (int l = i + 1; l <= k; ++l) {
+                                tour[l] = newTour[l];
+                            }
+                            done = false;
+                            ++num3Swaps;
+                            continue;
+                        }
+                        if (metric[c1][c2] + metric[c3][c4] + metric[c5][c6] >
+                            metric[c1][c4] + metric[c2][c6] + metric[c3][c5] + tsp::utils::EPSILON) {
+                            int counter = i + 1;
+                            for (int l = j + 1; l <= k; ++l) {
+                                newTour[counter++] = tour[l];
+                            }
+                            for (int l = j; l >= i + 1; --l) {
+                                newTour[counter++] = tour[l];
+                            }
+                            for (int l = i + 1; l <= k; ++l) {
+                                tour[l] = newTour[l];
+                            }
+                            done = false;
+                            ++num3Swaps;
+                            continue;
+                        }
+                        if (metric[c1][c2] + metric[c3][c4] + metric[c5][c6] >
+                            metric[c1][c5] + metric[c2][c4] + metric[c3][c6] + tsp::utils::EPSILON) {
+                            int counter = i + 1;
+                            for (int l = k; l >= j + 1; --l) {
+                                newTour[counter++] = tour[l];
+                            }
+                            for (int l = i + 1; l <= j; ++l) {
+                                newTour[counter++] = tour[l];
+                            }
+                            for (int l = i + 1; l <= k; ++l) {
+                                tour[l] = newTour[l];
+                            }
+                            done = false;
+                            ++num3Swaps;
+                            continue;
+                        }
+                        if (metric[c1][c2] + metric[c3][c4] + metric[c5][c6] >
+                            metric[c1][c4] + metric[c2][c5] + metric[c3][c6] + tsp::utils::EPSILON) {
+                            int counter = i + 1;
+                            for (int l = j + 1; l <= k; ++l) {
+                                newTour[counter++] = tour[l];
+                            }
+                            for (int l = i + 1; l <= j; ++l) {
+                                newTour[counter++] = tour[l];
+                            }
+                            for (int l = i + 1; l <= k; ++l) {
+                                tour[l] = newTour[l];
+                            }
+                            done = false;
+                            ++num3Swaps;
+                            continue;
+                        }
+                    }
+                }
+            }
+            if (done) {
+                break;
+            }
+            ++numRounds;
+        }
+        std::cerr << "3OPT_ROUNDS " << numRounds << std::endl;
+        std::cerr << "3OPT_2SWAPS " << num2Swaps << std::endl;
+        std::cerr << "3OPT_3SWAPS " << num3Swaps << std::endl;
+    }
+
+    void doBest3Opt(std::vector<int> &tour) {
+        int n = static_cast<int>(tour.size());
+        std::vector<int> newTour(n);
+        int numSwaps = 0;
+        for (;;) {
+            double bestGain = 0.0;
+            int bestType = -1;
+            int bestI = -1;
+            int bestJ = -1;
+            int bestK = -1;
+            for (int i = 0; i < n; ++i) {
+                for (int j = i + 1; j < n; ++j) {
+                    int c1 = tour[i];
+                    int c2 = tour[(i + 1) % n];
+                    int c3 = tour[j];
+                    int c4 = tour[(j + 1) % n];
+                    double gain = metric[c1][c2] + metric[c3][c4] - metric[c1][c3] - metric[c2][c4];
+                    if (gain > bestGain) {
+                        bestGain = gain;
+                        bestType = 0;
+                        bestI = i;
+                        bestJ = j;
+                    }
+                }
+            }
+            for (int i = 0; i < n; ++i) {
+                for (int j = i + 1; j < n; ++j) {
+                    for (int k = j + 1; k < n; ++k) {
+                        int c1 = tour[i];
+                        int c2 = tour[(i + 1) % n];
+                        int c3 = tour[j];
+                        int c4 = tour[(j + 1) % n];
+                        int c5 = tour[k];
+                        int c6 = tour[(k + 1) % n];
+                        double gain;
+                        gain = metric[c1][c2] + metric[c3][c4] + metric[c5][c6] -
+                               metric[c1][c3] - metric[c2][c5] - metric[c4][c6];
+                        if (gain > bestGain) {
+                            bestGain = gain;
+                            bestType = 1;
+                            bestI = i;
+                            bestJ = j;
+                            bestK = k;
+                        }
+                        gain = metric[c1][c2] + metric[c3][c4] + metric[c5][c6] -
+                               metric[c1][c4] - metric[c2][c6] - metric[c3][c5];
+                        if (gain > bestGain) {
+                            bestGain = gain;
+                            bestType = 2;
+                            bestI = i;
+                            bestJ = j;
+                            bestK = k;
+                        }
+                        gain = metric[c1][c2] + metric[c3][c4] + metric[c5][c6] -
+                               metric[c1][c5] - metric[c2][c4] - metric[c3][c6];
+                        if (gain > bestGain) {
+                            bestGain = gain;
+                            bestType = 3;
+                            bestI = i;
+                            bestJ = j;
+                            bestK = k;
+                        }
+                        gain = metric[c1][c2] + metric[c3][c4] + metric[c5][c6] -
+                               metric[c1][c4] - metric[c2][c5] - metric[c3][c6];
+                        if (gain > bestGain) {
+                            bestGain = gain;
+                            bestType = 4;
+                            bestI = i;
+                            bestJ = j;
+                            bestK = k;
+                        }
+                    }
+                }
+            }
+            if (bestGain < tsp::utils::EPSILON) {
+                break;
+            }
+            ++numSwaps;
+            if (bestType == 0) {
+                int counter = bestI + 1;
+                for (int l = bestJ; l >= bestI + 1; --l) {
+                    newTour[counter++] = tour[l];
+                }
+                for (int l = bestI + 1; l <= bestJ; ++l) {
+                    tour[l] = newTour[l];
+                }
+            }
+            else if (bestType == 1) {
+                int counter = bestI + 1;
+                for (int l = bestJ; l >= bestI + 1; --l) {
+                    newTour[counter++] = tour[l];
+                }
+                for (int l = bestK; l >= bestJ + 1; --l) {
+                    newTour[counter++] = tour[l];
+                }
+                for (int l = bestI + 1; l <= bestK; ++l) {
+                    tour[l] = newTour[l];
+                }
+            }
+            else if (bestType == 2) {
+                int counter = bestI + 1;
+                for (int l = bestJ + 1; l <= bestK; ++l) {
+                    newTour[counter++] = tour[l];
+                }
+                for (int l = bestJ; l >= bestI + 1; --l) {
+                    newTour[counter++] = tour[l];
+                }
+                for (int l = bestI + 1; l <= bestK; ++l) {
+                    tour[l] = newTour[l];
+                }
+            }
+            else if (bestType == 3) {
+                int counter = bestI + 1;
+                for (int l = bestK; l >= bestJ + 1; --l) {
+                    newTour[counter++] = tour[l];
+                }
+                for (int l = bestI + 1; l <= bestJ; ++l) {
+                    newTour[counter++] = tour[l];
+                }
+                for (int l = bestI + 1; l <= bestK; ++l) {
+                    tour[l] = newTour[l];
+                }
+            }
+            else if (bestType == 4) {
+                int counter = bestI + 1;
+                for (int l = bestJ + 1; l <= bestK; ++l) {
+                    newTour[counter++] = tour[l];
+                }
+                for (int l = bestI + 1; l <= bestJ; ++l) {
+                    newTour[counter++] = tour[l];
+                }
+                for (int l = bestI + 1; l <= bestK; ++l) {
+                    tour[l] = newTour[l];
+                }
+            }
+        }
+        std::cerr << "BEST_3OPT_SWAPS " << numSwaps << std::endl;
+    }
 private:
     const std::vector<std::vector<double> > &metric;
 

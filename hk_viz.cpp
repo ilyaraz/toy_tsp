@@ -28,7 +28,7 @@ std::string processRequest(int n) {
     */
     tsp::core::TSPHeuristics heuristicSolver(metric);
     std::vector<int> greedyTour = heuristicSolver.getGreedyTour();
-    heuristicSolver.doBest2Opt(greedyTour);
+    heuristicSolver.doBest3Opt(greedyTour);
     for (int i = 0; i < n; ++i) {
         int u = greedyTour[i];
         int v = greedyTour[(i + 1) % n];

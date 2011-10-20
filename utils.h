@@ -11,6 +11,7 @@ namespace tsp {
 namespace utils {
 
 const double EPSILON = 1e-10;
+const double PI = acos(-1.0);
 
 std::vector<std::vector<double> > readData(std::istream &input) {
     int n;
@@ -29,6 +30,22 @@ std::vector<std::pair<double, double> > generateEuclidean(int n) {
     for (int i = 0; i < n; ++i) {
         double x = (rand() + 1.0) / (RAND_MAX + 0.0);
         double y = (rand() + 1.0) / (RAND_MAX + 0.0);
+        points.push_back(std::make_pair(x, y));
+    }
+    return points;
+}
+
+double getNormal() {
+    double u = (rand() + 1.0) / (RAND_MAX + 0.0);
+    double v = (rand() + 1.0) / (RAND_MAX + 0.0);
+    return sqrt(-2.0 * log(u)) * cos(2 * PI * v);
+}
+
+std::vector<std::pair<double, double> > generateNormal(int n) {
+    std::vector<std::pair<double, double> > points;
+    for (int i = 0; i < n; ++i) {
+        double x = 0.5 + 0.1 * getNormal(); 
+        double y = 0.5 + 0.1 * getNormal();
         points.push_back(std::make_pair(x, y));
     }
     return points;

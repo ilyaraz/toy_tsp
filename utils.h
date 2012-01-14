@@ -55,6 +55,10 @@ template<typename T> T sqr(T x) {
     return x * x;
 }
 
+template<typename T> T abs(T x) {
+    return (x > 0) ? x : -x;
+}
+
 std::vector<std::vector<double> > getEuclideanMetric(const std::vector<std::pair<double, double> > &points) {
     int n = static_cast<int>(points.size());
     std::vector<std::vector<double> > metric(n, std::vector<double>(n));

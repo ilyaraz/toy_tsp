@@ -6,6 +6,7 @@
 
 #include <iostream>
 #include <set>
+#include <utility>
 #include <vector>
 
 namespace tsp { 

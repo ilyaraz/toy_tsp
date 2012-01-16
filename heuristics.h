@@ -176,8 +176,8 @@ public:
             }
             ++numRounds;
         }
-        std::cerr << "2OPT_ROUNDS " << numRounds << std::endl;
-        std::cerr << "2OPT_SWAPS " << numSwaps << std::endl;
+        //std::cerr << "2OPT_ROUNDS " << numRounds << std::endl;
+        //std::cerr << "2OPT_SWAPS " << numSwaps << std::endl;
     }
 
     void doBest2Opt(std::vector<int> &tour) {
@@ -211,7 +211,7 @@ public:
             }
             ++numSwaps;
         }
-        std::cerr << "BEST2OPT_SWAPS " << numSwaps << std::endl;
+        //std::cerr << "BEST2OPT_SWAPS " << numSwaps << std::endl;
     }
 
     void do3Opt(std::vector<int> &tour) {
@@ -321,9 +321,9 @@ public:
             }
             ++numRounds;
         }
-        std::cerr << "3OPT_ROUNDS " << numRounds << std::endl;
-        std::cerr << "3OPT_2SWAPS " << num2Swaps << std::endl;
-        std::cerr << "3OPT_3SWAPS " << num3Swaps << std::endl;
+        //std::cerr << "3OPT_ROUNDS " << numRounds << std::endl;
+        //std::cerr << "3OPT_2SWAPS " << num2Swaps << std::endl;
+        //std::cerr << "3OPT_3SWAPS " << num3Swaps << std::endl;
     }
 
     void doBest3Opt(std::vector<int> &tour) {
@@ -462,7 +462,7 @@ public:
                 }
             }
         }
-        std::cerr << "BEST_3OPT_SWAPS " << numSwaps << std::endl;
+        //std::cerr << "BEST_3OPT_SWAPS " << numSwaps << std::endl;
     }
 private:
     const std::vector<std::vector<double> > &metric;

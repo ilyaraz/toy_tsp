@@ -61,6 +61,8 @@ class BranchBound {
         }
         
         void run() {
+            std::cerr.setf(std::ios::fixed);
+            std::cerr.precision(10);
             TSPHeuristics solver(metric);
             std::vector<int> heuristicTour = solver.getGreedyTour();
             solver.doBest3Opt(heuristicTour);
@@ -69,12 +71,17 @@ class BranchBound {
             std::set<BranchBoundNode, BranchBoundNodesComparator> branchBoundNodes;
             branchBoundNodes.insert(createBranchBoundNode(emptyPartialTour));
             for (;;) {
-                for (std::set<BranchBoundNode, BranchBoundNodesComparator>::const_iterator it = branchBoundNodes.begin();
-                        it != branchBoundNodes.end();
-                        ++it) {
-                    std::cerr << it->lowerBound << " ";
+                for (;;) {
+                    if (branchBoundNodes.empty()) {
+                        break;
+                    }
+                    BranchBoundNode lastNode = *branchBoundNodes.rbegin();
+                    if (lastNode.lowerBound > globalState.upperBound - tsp::utils::EPSILON) {
+                        branchBoundNodes.erase(--branchBoundNodes.rbegin().base());
+                        continue;
+                    }
+                    break;
                 }
-                std::cerr << std::endl;
                 if (branchBoundNodes.empty()) {
                     std::cerr << "Pruning..." << std::endl;
                     std::cerr << "Answer: " << globalState.upperBound << std::endl;
@@ -82,7 +89,8 @@ class BranchBound {
                 }
                 BranchBoundNode currentNode = *branchBoundNodes.begin();
                 branchBoundNodes.erase(branchBoundNodes.begin());
-                std::cerr << currentNode.lowerBound << " vs " << globalState.upperBound << std::endl;
+                std::cerr << currentNode.lowerBound << " vs " << globalState.upperBound
+                          << " (" << branchBoundNodes.size() << " nodes)" << std::endl;
                 std::vector<BranchBoundNode> children = getChildren(currentNode, globalState);
                 branchBoundNodes.insert(children.begin(), children.end());
             }
@@ -110,8 +118,6 @@ class BranchBound {
             }
             if (currentNode.isIntegral()) {
                 std::cerr << "update: " << globalState.upperBound << " -> " << currentNode.lowerBound << std::endl;
-                int tmp;
-                std::cin >> tmp;
                 globalState.upperBound = currentNode.lowerBound;
                 return std::vector<BranchBoundNode>();
             }
@@ -122,8 +128,6 @@ class BranchBound {
             double cost = tsp::utils::evaluateTour(metric, heuristicTour);
             if (cost < globalState.upperBound - tsp::utils::EPSILON) {
                 std::cerr << "heuristic update: " << globalState.upperBound << " -> " << cost << std::endl;
-                int tmp;
-                std::cin >> tmp;
                 globalState.upperBound = cost;
             }
             std::vector<std::vector<double> > _partialTour(n, std::vector<double>(n));
@@ -137,8 +141,6 @@ class BranchBound {
             cost = tsp::utils::evaluateTour(metric, heuristicTour);
             if (cost < globalState.upperBound - tsp::utils::EPSILON) {
                 std::cerr << "heuristic update 2: " << globalState.upperBound << " -> " << cost << std::endl;
-                int tmp;
-                std::cin >> tmp;
                 globalState.upperBound = cost;
             }
             /**/
@@ -153,7 +155,6 @@ class BranchBound {
                     }
                 }
             }
-            std::cerr << "branching on " << currentNode.bestFractionalTour[branchPair.first][branchPair.second] << std::endl;
             std::vector<BranchBoundNode> children;
             for (int i = 0; i < 2; ++i) {
                 std::vector<std::vector<char> > partialTour(currentNode.partialTour);
@@ -164,8 +165,6 @@ class BranchBound {
                 }
                 if (child.isIntegral()) {
                     std::cerr << "update child: " << globalState.upperBound << " -> " << child.lowerBound << std::endl;
-                    int tmp;
-                    std::cin >> tmp;
                     globalState.upperBound = child.lowerBound;
                     continue;
                 }

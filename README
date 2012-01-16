@@ -1,1 +1,3 @@
 Toy TSP solver which is being implemented just for fun. Don't try to use it on real-world instances! :)
+
+TODO: added an interactive visualization of branch-and-bound.

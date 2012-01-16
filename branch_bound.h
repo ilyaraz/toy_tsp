@@ -9,6 +9,8 @@
 #include <utility>
 #include <vector>
 
+#include <cstdlib>
+
 namespace tsp { 
 namespace core {
 
@@ -67,23 +69,18 @@ class BranchBound {
             std::set<BranchBoundNode, BranchBoundNodesComparator> branchBoundNodes;
             branchBoundNodes.insert(createBranchBoundNode(emptyPartialTour));
             for (;;) {
+                for (std::set<BranchBoundNode, BranchBoundNodesComparator>::const_iterator it = branchBoundNodes.begin();
+                        it != branchBoundNodes.end();
+                        ++it) {
+                    std::cerr << it->lowerBound << " ";
+                }
+                std::cerr << std::endl;
                 if (branchBoundNodes.empty()) {
                     std::cerr << "Pruning..." << std::endl;
                     std::cerr << "Answer: " << globalState.upperBound << std::endl;
                     break;
                 }
                 BranchBoundNode currentNode = *branchBoundNodes.begin();
-                if (currentNode.lowerBound > globalState.upperBound - tsp::utils::EPSILON) {
-                    std::cerr << "Pruning..." << std::endl;
-                    std::cerr << "Answer: " << globalState.upperBound << std::endl;
-                    break;
-                }
-                if (currentNode.isIntegral()) {
-                    std::cerr << "Integral solution..." << std::endl;
-                    std::cerr << "Answer: " << currentNode.lowerBound << std::endl;
-                    break;
-                }
-                std::cerr << branchBoundNodes.size() << " branch-bound nodes" << std::endl;
                 branchBoundNodes.erase(branchBoundNodes.begin());
                 std::cerr << currentNode.lowerBound << " vs " << globalState.upperBound << std::endl;
                 std::vector<BranchBoundNode> children = getChildren(currentNode, globalState);
@@ -106,7 +103,45 @@ class BranchBound {
             return BranchBoundNode(lowerBound, partialTour, bestFractionalTour);
         }
 
-        std::vector<BranchBoundNode> getChildren(const BranchBoundNode &currentNode, const BranchBoundGlobalState &globalState) {
+        std::vector<BranchBoundNode> getChildren(const BranchBoundNode &currentNode,
+                                                 BranchBoundGlobalState &globalState) {
+            if (currentNode.lowerBound > globalState.upperBound - tsp::utils::EPSILON) {
+                return std::vector<BranchBoundNode>();
+            }
+            if (currentNode.isIntegral()) {
+                std::cerr << "update: " << globalState.upperBound << " -> " << currentNode.lowerBound << std::endl;
+                int tmp;
+                std::cin >> tmp;
+                globalState.upperBound = currentNode.lowerBound;
+                return std::vector<BranchBoundNode>();
+            }
+            /*Applying a heuristic*/
+            TSPHeuristics solver(metric);
+            std::vector<int> heuristicTour = solver.getGreedyTour(currentNode.bestFractionalTour);
+            solver.doBest3Opt(heuristicTour);
+            double cost = tsp::utils::evaluateTour(metric, heuristicTour);
+            if (cost < globalState.upperBound - tsp::utils::EPSILON) {
+                std::cerr << "heuristic update: " << globalState.upperBound << " -> " << cost << std::endl;
+                int tmp;
+                std::cin >> tmp;
+                globalState.upperBound = cost;
+            }
+            std::vector<std::vector<double> > _partialTour(n, std::vector<double>(n));
+            for (int i = 0; i < n; ++i) {
+                for (int j = 0; j < n; ++j) {
+                    _partialTour[i][j] = currentNode.partialTour[i][j];
+                }
+            }
+            heuristicTour = solver.getGreedyTour(_partialTour);
+            solver.doBest3Opt(heuristicTour);
+            cost = tsp::utils::evaluateTour(metric, heuristicTour);
+            if (cost < globalState.upperBound - tsp::utils::EPSILON) {
+                std::cerr << "heuristic update 2: " << globalState.upperBound << " -> " << cost << std::endl;
+                int tmp;
+                std::cin >> tmp;
+                globalState.upperBound = cost;
+            }
+            /**/
             double bestDifference = 10.0;
             std::pair<int, int> branchPair(-1, -1);
             for (int i = 0; i < n; ++i) {
@@ -125,6 +160,13 @@ class BranchBound {
                 partialTour[branchPair.first][branchPair.second] = partialTour[branchPair.second][branchPair.first] = i;
                 BranchBoundNode child = createBranchBoundNode(partialTour);
                 if (child.lowerBound > globalState.upperBound - tsp::utils::EPSILON) {
+                    continue;
+                }
+                if (child.isIntegral()) {
+                    std::cerr << "update child: " << globalState.upperBound << " -> " << child.lowerBound << std::endl;
+                    int tmp;
+                    std::cin >> tmp;
+                    globalState.upperBound = child.lowerBound;
                     continue;
                 }
                 children.push_back(child);

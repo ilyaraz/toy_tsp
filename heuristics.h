@@ -38,7 +38,7 @@ public:
         }
         return tour;
     }
-    
+
     std::vector<int> getGreedyTour() {
         int n = static_cast<int>(metric.size());
         std::vector<std::pair<double, std::pair<int, int> > > edges(n * (n - 1) / 2);
@@ -56,6 +56,62 @@ public:
         std::vector<int> neighbors(2 * n, -1);
         for (int i = 0; i < numEdges; ++i) {
             const std::pair<double, std::pair<int, int> > &edge = edges[i];
+            int u = edge.second.first;
+            int v = edge.second.second;
+            if (degree[u] >= 2 || degree[v] >= 2) {
+                continue;
+            }
+            if (edgesAdded != n - 1 && dsu.getRoot(u) == dsu.getRoot(v)) {
+                continue;
+            }
+            dsu.connect(u, v);
+            ++degree[u];
+            ++degree[v];
+            ++edgesAdded;
+            addNeighbor(neighbors, u, v);
+            addNeighbor(neighbors, v, u);
+        }
+        std::vector<char> was(n, 0);
+        was[0] = 1;
+        std::vector<int> tour(n);
+        int tourLength = 1;
+        tour[0] = 0;
+        while (tourLength != n) {
+            int lastPoint = tour[tourLength - 1];
+            int nextPoint;
+            if (!was[neighbors[2 * lastPoint]]) {
+                nextPoint = neighbors[2 * lastPoint];
+            }
+            else {
+                nextPoint = neighbors[2 * lastPoint + 1];
+            }
+            tour[tourLength++] = nextPoint;
+            was[nextPoint] = 1;
+        }
+        return tour;
+    }
+    
+    std::vector<int> getGreedyTour(const std::vector<std::vector<double> > &fractionalTour) {
+        int n = static_cast<int>(metric.size());
+        std::vector<std::pair<std::pair<int, double>, std::pair<int, int> > > edges(n * (n - 1) / 2);
+        int numEdges = 0;
+        for (int i = 0; i < n; ++i) {
+            for (int j = i + 1; j < n; ++j) {
+                int flag = 0;
+                if (fractionalTour[i][j] > 1.0 - tsp::utils::EPSILON) {
+                    flag = -1;
+                }
+                edges[numEdges] = std::make_pair(std::make_pair(flag, metric[i][j]), std::make_pair(i, j));
+                ++numEdges;
+            }
+        }
+        std::sort(edges.begin(), edges.end());
+        tsp::utils::DSU dsu(n);
+        std::vector<int> degree(n, 0);
+        int edgesAdded = 0;
+        std::vector<int> neighbors(2 * n, -1);
+        for (int i = 0; i < numEdges; ++i) {
+            const std::pair<std::pair<int, double>, std::pair<int, int> > &edge = edges[i];
             int u = edge.second.first;
             int v = edge.second.second;
             if (degree[u] >= 2 || degree[v] >= 2) {
